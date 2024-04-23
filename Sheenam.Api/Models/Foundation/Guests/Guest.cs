@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sheenam.Api.Models.Foundation
+namespace Sheenam.Api.Models.Foundation.Guests
 {
     public class Guest
     {

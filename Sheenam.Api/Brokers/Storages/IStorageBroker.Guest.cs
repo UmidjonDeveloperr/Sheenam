@@ -1,11 +1,11 @@
-﻿using Sheenam.Api.Models.Foundation;
+﻿using Sheenam.Api.Models.Foundation.Guests;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sheenam.Api.Brokers.Storages
 {
-	public partial interface IStorageBroker
+    public partial interface IStorageBroker
 	{
 		ValueTask<Guest> InsertGuestAsync(Guest guest);
 		IQueryable<Guest> SelectAllGuests();
