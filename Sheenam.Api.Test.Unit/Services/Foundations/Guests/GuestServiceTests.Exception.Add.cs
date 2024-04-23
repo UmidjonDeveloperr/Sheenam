@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using EFxceptions.Models.Exceptions;
 
 namespace Sheenam.Api.Test.Unit.Services.Foundations.Guests
 {
@@ -45,6 +46,44 @@ namespace Sheenam.Api.Test.Unit.Services.Foundations.Guests
 
 			this.storageBrokerMock.VerifyNoOtherCalls();
 			this.loggingBrokerMock.VerifyNoOtherCalls();
+		}
+		[Fact]
+		public async Task ShouldThrowExceptiononAddIfDuplicateKeyErrorOccurs()
+		{
+			// given
+			Guest someGuest = CreateRandomGuest();
+			string someString = GetRandomString();
+
+			var duplicateKeyException = new DuplicateKeyException(someString);
+
+			var alreadyExistGuestException =
+				new AlreadyExistGuestException(duplicateKeyException);
+
+			var guestDependencyValidationException =
+				new GuestDependencyValidationException(alreadyExistGuestException);
+
+			this.storageBrokerMock.Setup(broker =>
+				broker.InsertGuestAsync(someGuest))
+				.ThrowsAsync(duplicateKeyException);
+
+			// when 
+			ValueTask<Guest> AddGuestTask =
+				this.guestService.AddGuestAsync(someGuest);
+
+			// then
+			await Assert.ThrowsAnyAsync<GuestDependencyValidationException>(() =>
+			   AddGuestTask.AsTask());
+
+			this.storageBrokerMock.Verify(broker =>
+				broker.InsertGuestAsync(someGuest),
+				Times.Once());
+
+			this.loggingBrokerMock.Verify(broker =>
+			   broker.LogError(It.Is(SameExceptionAs(guestDependencyValidationException))),
+			   Times.Once());
+
+			this.loggingBrokerMock.VerifyNoOtherCalls();
+			this.storageBrokerMock.VerifyNoOtherCalls();
 		}
 	}
 }
