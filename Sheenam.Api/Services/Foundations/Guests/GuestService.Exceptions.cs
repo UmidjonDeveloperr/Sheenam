@@ -28,6 +28,13 @@ namespace Sheenam.Api.Services.Foundations.Guests
 			{
 				throw CreateAndLogValidationException(invalidGuestException);
 			}
+			catch (SqlException sqlException)
+			{
+				var failedGuestStorageException =
+					new FailedGuestStorageException(sqlException);
+
+				throw CreateAndLogCriticalException(failedGuestStorageException);
+			}
 		}
 
 		private IQueryable<Guest> TryCatch(ReturningGuestsFunction returningGuestsFunction)
@@ -40,6 +47,13 @@ namespace Sheenam.Api.Services.Foundations.Guests
 			var guestValidationException = new GuestValidationException(exception);
 			this.loggingBroker.LogError(guestValidationException);
 			return guestValidationException;
+		}
+
+		private GuestDependencyException CreateAndLogCriticalException(Xeption exception)
+		{
+			var guestDependencyException = new GuestDependencyException(exception);
+			this.loggingBroker.LogCritical(guestDependencyException);
+			return guestDependencyException;
 		}
 
 	}
