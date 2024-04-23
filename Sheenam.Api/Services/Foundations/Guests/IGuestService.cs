@@ -1,11 +1,11 @@
-﻿using Sheenam.Api.Models.Foundation;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System;
+using Sheenam.Api.Models.Foundation.Guests;
 
 namespace Sheenam.Api.Services.Foundations.Guests
 {
-	public interface IGuestService
+    public interface IGuestService
 	{
 		ValueTask<Guest> AddGuestAsync(Guest guest);
 		IQueryable<Guest> RetrieveAllGuests();

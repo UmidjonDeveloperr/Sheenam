@@ -1,13 +1,13 @@
 ﻿using Sheenam.Api.Brokers.Loggings;
 using Sheenam.Api.Brokers.Storages;
-using Sheenam.Api.Models.Foundation;
+using Sheenam.Api.Models.Foundation.Guests;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sheenam.Api.Services.Foundations.Guests
 {
-	public class GuestService : IGuestService
+    public partial class GuestService : IGuestService
 	{
 		private readonly IStorageBroker storageBroker;
 		private readonly ILoggingBroker loggingBroker;

@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Sheenam.Api.Models.Foundation;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using Sheenam.Api.Models.Foundation.Guests;
 
 namespace Sheenam.Api.Brokers.Storages
 {
-	public partial class StorageBroker
+    public partial class StorageBroker
 	{
 		public DbSet<Guest> Guests { get; set; }
 
