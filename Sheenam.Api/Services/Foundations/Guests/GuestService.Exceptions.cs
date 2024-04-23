@@ -16,12 +16,26 @@ namespace Sheenam.Api.Services.Foundations.Guests
 
 		private async ValueTask<Guest> TryCatch(ReturningGuestFunction returningGuestFunction)
 		{
-			return await returningGuestFunction();
+			try
+			{
+				return await returningGuestFunction();
+			}
+			catch (NullGuestException nullGuestException)
+			{
+				throw CreateAndLogValidationException(nullGuestException);
+			}
 		}
 
 		private IQueryable<Guest> TryCatch(ReturningGuestsFunction returningGuestsFunction)
 		{
 			return returningGuestsFunction();
+		}
+
+		private GuestValidationException CreateAndLogValidationException(Xeption exception)
+		{
+			var guestValidationException = new GuestValidationException(exception);
+			this.loggingBroker.LogError(guestValidationException);
+			return guestValidationException;
 		}
 
 	}
