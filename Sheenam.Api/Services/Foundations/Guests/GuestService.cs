@@ -18,32 +18,44 @@ namespace Sheenam.Api.Services.Foundations.Guests
 			this.loggingBroker = loggingBroker;
 		}
 
-		public async ValueTask<Guest> AddGuestAsync(Guest guest)
-		{
-			return await this.storageBroker.InsertGuestAsync(guest);
-		}
+		public ValueTask<Guest> AddGuestAsync(Guest guest) =>
+			TryCatch(async () =>
+			{
+				ValidateGuestOnAdd(guest);
+				guest.CreatedDate = DateTimeOffset.UtcNow;
+				guest.UpdatedDate = DateTimeOffset.UtcNow;
 
-		public IQueryable<Guest> RetrieveAllGuests()
-		{
-			return this.storageBroker.SelectAllGuests();
-		}
+				return await this.storageBroker.InsertGuestAsync(guest);
+			});
 
-		public async ValueTask<Guest> RetrieveGuestByIdAsync(Guid id)
-		{
-			return await this.storageBroker.SelectGuestByIdAsync(id);
-		}
+		public IQueryable<Guest> RetrieveAllGuests() =>
+			TryCatch(() => this.storageBroker.SelectAllGuests());
 
-		public async ValueTask<Guest> ModifyGuestAsync(Guest guest)
-		{
-			return await this.storageBroker.UpdateGuestAsync(guest);
-		}
+		public ValueTask<Guest> RetrieveGuestByIdAsync(Guid id) =>
+			TryCatch(async () =>
+			{
+				ValidateGuestId(id);
+				return await this.storageBroker.SelectGuestByIdAsync(id);
+			});
 
-		public async ValueTask<Guest> RemoveGuestAsync(Guid id)
-		{
-			Guest getGuest = await this.storageBroker.SelectGuestByIdAsync(id);
+		public ValueTask<Guest> ModifyGuestAsync(Guest guest) =>
+			TryCatch(async () =>
+			{
+				ValidateGuestOnModify(guest);
 
-			return await this.storageBroker.DeleteGuestAsync(getGuest);
-		}
+				return await this.storageBroker.UpdateGuestAsync(guest);
+			});
+
+		public ValueTask<Guest> RemoveGuestAsync(Guid id) =>
+			TryCatch(async () =>
+			{
+				ValidateGuestId(id);
+
+				Guest gettingGuest =
+					await this.storageBroker.SelectGuestByIdAsync(id);
+
+				return await this.storageBroker.DeleteGuestAsync(gettingGuest);
+			});
 
 	}
 }
