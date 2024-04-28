@@ -4,6 +4,10 @@ using Sheenam.Api.Models.Foundation.Guests.Exceptions;
 using Sheenam.Api.Models.Foundation.Guests;
 using Sheenam.Api.Services.Foundations.Guests;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System;
+using System.Linq;
 
 namespace Sheenam.Api.Controllers
 {
@@ -17,6 +21,24 @@ namespace Sheenam.Api.Controllers
 		{
 			this.guestService = guestService;
 		}
+
+		private string GetCurrentGuest()
+		{
+			var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+			if (identity != null)
+			{
+				var userClaims = identity.Claims;
+
+				string Id = userClaims.FirstOrDefault(x => x.Type ==
+					ClaimTypes.NameIdentifier)?.Value;
+
+				return Id;
+			}
+
+			throw new UnauthorizedAccessException();
+		}
+
 		[HttpPost]
 		public async ValueTask<ActionResult<Guest>> PostGuestAsync(Guest guest)
 		{
@@ -49,6 +71,35 @@ namespace Sheenam.Api.Controllers
 				return InternalServerError(guestServiceException.InnerException);
 			}
 		}
+		
+		[HttpGet("{id}")]
+		public async ValueTask<ActionResult<Guest>> GetGuestByIdAsync([FromRoute] Guid id)
+		{
+			try
+			{
+				var identity = HttpContext.User.Identity as ClaimsIdentity;
+				var userClaims = identity.Claims;
 
+				string? authorizedGuestId = userClaims.FirstOrDefault(x => x.Type ==
+					ClaimTypes.NameIdentifier)?.Value;
+
+				
+
+				Guest currentGuest = await this.guestService.RetrieveGuestByIdAsync(id);
+				return Ok(currentGuest);
+			}
+			catch (GuestValidationException guestValidationException)
+			{
+				return BadRequest(guestValidationException.InnerException);
+			}
+			catch (GuestDependencyException guestDependencyException)
+			{
+				return InternalServerError(guestDependencyException.InnerException);
+			}
+			catch (GuestDependencyServiceException guestDependencyServiceException)
+			{
+				return InternalServerError(guestDependencyServiceException.InnerException);
+			}
+		}
 	}
 }
