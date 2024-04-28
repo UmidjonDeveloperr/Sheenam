@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Sheenam.Api.Brokers.Loggings;
+using Sheenam.Api.Brokers.Storages;
+using Sheenam.Api.Services.Foundations.Guests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +29,10 @@ namespace Sheenam.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-
+			services.AddDbContext<StorageBroker>();
 			services.AddControllers();
+			AddBrokers(services);
+			AddFoundationservices(services);
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sheenam.Api", Version = "v1" });
@@ -54,6 +59,16 @@ namespace Sheenam.Api
 			{
 				endpoints.MapControllers();
 			});
+		}
+		private static void AddBrokers(IServiceCollection services)
+		{
+			services.AddTransient<IStorageBroker, StorageBroker>();
+			services.AddTransient<ILoggingBroker, LoggingBroker>();
+		}
+
+		private static void AddFoundationservices(IServiceCollection services)
+		{
+			services.AddTransient<IGuestService, GuestService>();
 		}
 	}
 }
