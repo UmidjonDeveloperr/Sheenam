@@ -22,23 +22,6 @@ namespace Sheenam.Api.Controllers
 			this.guestService = guestService;
 		}
 
-		private string GetCurrentGuest()
-		{
-			var identity = HttpContext.User.Identity as ClaimsIdentity;
-
-			if (identity != null)
-			{
-				var userClaims = identity.Claims;
-
-				string Id = userClaims.FirstOrDefault(x => x.Type ==
-					ClaimTypes.NameIdentifier)?.Value;
-
-				return Id;
-			}
-
-			throw new UnauthorizedAccessException();
-		}
-
 		[HttpPost]
 		public async ValueTask<ActionResult<Guest>> PostGuestAsync(Guest guest)
 		{
